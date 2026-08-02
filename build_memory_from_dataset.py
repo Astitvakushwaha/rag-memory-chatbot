@@ -32,7 +32,7 @@ def main():
     embedder = Embedder()
     memory = VectorMemory(dim=embedder.dim, index_path="data/memory_index")
 
-    texts = [f"User asked: {q} | Bot answered: {a}" for q, a in zip(questions, answers)]
+    texts = [f'A past conversation touched on "{q}" - the answer given was: {a}' for q, a in zip(questions, answers)]
 
     print("embedding dataset, this can take a minute on CPU...")
     vectors = embedder.encode(texts)

@@ -1,35 +1,20 @@
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-
-
-class ResponseGenerator:
-    """
-    Generates a reply given the current message plus whatever the memory
-    search pulled up. flan-t5-base is small enough to run on CPU and
-    follows instructions reasonably well for a project like this.
-
-    Loading the model/tokenizer directly instead of going through
-    transformers' pipeline() helper - some recent transformers versions
-    don't register text2text-generation in the pipeline task registry,
-    so this sidesteps that entirely.
-    """
-
-    def __init__(self, model_name="google/flan-t5-base"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-
-    def generate(self, query, memory_context):
+def generate(self, query, memory_context):
         if memory_context:
             context_str = "\n".join(f"- {c}" for c in memory_context)
             prompt = (
-                "You are a chatbot with memory of earlier conversations. "
-                "Use the relevant past context below if it helps answer the "
-                "current message, otherwise ignore it.\n\n"
-                f"Relevant past context:\n{context_str}\n\n"
-                f"Current message: {query}\n"
-                "Reply:"
+                "You are a chatbot having a live conversation. Below are notes "
+                "from earlier conversations that might be relevant. Use them "
+                "only as background - do NOT copy or repeat their wording. "
+                "Write a brand new, natural reply to the current message.\n\n"
+                f"Background notes:\n{context_str}\n\n"
+                f"Current message from the user: {query}\n\n"
+                "Write only your reply, in your own words:"
             )
         else:
-            prompt = f"Current message: {query}\nReply:"
+            prompt = (
+                "You are a chatbot having a live conversation. Reply naturally "
+                f"to this message:\n\n{query}\n\nYour reply:"
+            )
 
         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
         outputs = self.model.generate(
@@ -37,5 +22,7 @@ class ResponseGenerator:
             max_new_tokens=120,
             do_sample=True,
             temperature=0.7,
+            repetition_penalty=1.3,
+            no_repeat_ngram_size=3,
         )
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()

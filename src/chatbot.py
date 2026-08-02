@@ -23,9 +23,9 @@ class MemoryChatbot:
 
         # store this turn so future questions can find it too
         self.memory.add(
-            [query_vec],
-            [f"User said: {user_input} | Bot replied: {response}"],
-            [{"timestamp": datetime.datetime.now().isoformat()}],
+            [query_vec],    
+                [f'Earlier, the user brought up "{user_input}" and the topic discussed was: {response}'],
+                [{"timestamp": datetime.datetime.now().isoformat()}],
         )
 
         return response, retrieved
