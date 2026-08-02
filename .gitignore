@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.vscode/
+data/memory_index.faiss
+data/memory_index_meta.pkl
+*.faiss
